@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+    </head>
+    <body>
+        <h1>WebSocket Chat</h1>
+        <h2>Your ID: <span id="ws-id"></span></h2>
+        <form action="" onsubmit="sendMessage(event)">
+            <input type="text" id="messageText" autocomplete="off"/>
+            <button>Send</button>
+        </form>
+        <ul id='messages'>
+        </ul>
+        <script>
+
+            // отправляем запрос на сервер с куками, далее на сервере по токену получаем пользователя из БД и возвращаем его имя
+            async function getUser() {
+                //const url = `http://localhost:8000/chat/user`
+                //const url = 'http://127.0.0.1:8000/chat/user'
+                const url = `/chat/user`
+                const response = await fetch(url, {
+                    credentials: "include"
+                })
+                return response.text()
+            }
+            
+
+            let ws = null;
+            // добавляем новый вебсокет 
+            getUser()
+            .then(user => {
+                document.querySelector("#ws-id").textContent = user;
+                //ws = new WebSocket(`ws://localhost:8000/chat/ws/${user}`);
+                ws = new WebSocket(`ws://localhost/chat/ws/${user}`)
+                ws.onmessage = function (event) {
+                appendMessage(event.data);
+                };
+            });
+            
+            // делаем запрос на сервер, где получаем историю сообщении и возвращаем в формате JSON
+            async function getLastMessages() {
+                //const url = `http://localhost:8000/chat/last_messages`
+                const url = `/chat/last_messages`
+                const response = await fetch(url, {
+                    method: 'GET',
+                })
+                return response.json()
+            }
+            // добавляем историю сообщений на вывод на странице чата
+            getLastMessages()
+                .then(messages => {
+                    appendMessage("Предыдущие сообщения")
+                    messages.forEach(msg => {
+                        appendMessage(msg.message)
+                    })
+                    appendMessage("\rНовые сообщения")
+                })
+             
+            function appendMessage(msg){
+                var messages = document.getElementById('messages')
+                var message = document.createElement('li')
+                var content = document.createTextNode(msg)
+                message.appendChild(content)
+                messages.appendChild(message)
+            }
+
+            // отправка сообщений в чат
+            function sendMessage(event) {
+                let input = document.getElementById("messageText")
+                ws.send(input.value)
+                input.value = ''
+                event.preventDefault()
+            }
+        </script>
+    </body>
+</html>

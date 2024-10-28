@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<button onclick="send()">Залогиниться</button>
+<button onclick="window.location = '/pages/register';">Нет аккаунта? Зарегистрируйтесь.</button>
+<div id="message"></div>
+<script>
+    async function send(){
+
+    // получаем введеное в поле имя и пароль
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    // отправляем запрос на сервер с данными формы
+    const response = await fetch('/auth/login', {
+            method: "POST",
+            headers: { "Accept": "application/json", "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                username: username,
+                password: password
+            })
+        });
+        if (response.ok) {
+            setTimeout(function(){window.location.href='/pages/chat';}, 1000);
+        }
+        else
+            document.getElementById("message").textContent = "Пользователь не найден";
+            console.log(response);
+} 
+</script> 
+{% endblock %}

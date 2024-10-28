@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<button onclick="send()">Зарегистрировать нового пользователя</button>
+<button onclick="window.location = '/pages/login';">Уже есть аккаунт? Войдите.</button>
+<script>
+    async function send(){
+
+    // получаем введеное в поле имя и пароль
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    // отправляем запрос на сервер с данными формы
+    const response = await fetch('/auth/register', {
+            method: "POST",
+            headers: { "Accept": "application/json", "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                username: username,
+                password: password,
+            })
+        });
+        console.log(response);
+} 
+</script> 
+{% endblock %}
